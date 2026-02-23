@@ -1,50 +1,79 @@
-italian_food = ["Pasta Bolognese", "Pepperoni pizza", "Margherita pizza", "Lasagna"]
-indian_food = ["Curry", "Chutney", "Samosa", "Naan"]
+from typing import Dict, List, Optional
 
-def find_meal(name, menu):
+# Menu data structure: cuisine -> list of dishes
+MENUS: Dict[str, List[str]] = {
+    "italian": ["Pasta Bolognese", "Pepperoni pizza", "Margherita pizza", "Lasagna"],
+    "indian": ["Curry", "Chutney", "Samosa", "Naan"]
+}
+VALID_CUISINES = list(MENUS.keys())
 
-  return name if name in menu else None
+def display_available_meals(cuisine: str) -> None:
+    """Print all meals for a given cuisine."""
+    meals = MENUS.get(cuisine.lower())
+    if meals:
+        print(f"\nAvailable {cuisine.capitalize()} meals:")
+        for meal in meals:
+            print(f"  - {meal}")
+    else:
+        print(f"Sorry, we don't have '{cuisine}' cuisine. Choose from: {', '.join(VALID_CUISINES)}")
 
-def select_meal(name, food_type):
-  if food_type == "Italian":
-    return  find_meal(name, italian_food)
-  elif food_type == "Indian":
-    return  find_meal(name, indian_food)
-  else: None    
+def find_meal(cuisine: str, meal_name: str) -> Optional[str]:
+    """
+    Find a meal in the given cuisine's menu (case‑insensitive).
+    Returns the properly cased meal name if found, else None.
+    """
+    meals = MENUS.get(cuisine.lower())
+    if not meals:
+        return None
+    for meal in meals:
+        if meal.lower() == meal_name.lower():
+            return meal
+    return None
 
- 
+def get_positive_integer(prompt: str) -> int:
+    """Prompt user until a positive integer is entered."""
+    while True:
+        try:
+            value = int(input(prompt))
+            if value > 0:
+                return value
+            else:
+                print("Please enter a positive number.")
+        except ValueError:
+            print("Invalid input. Please enter an integer.")
 
-def display_available_meals(food_type):
+def get_cuisine_choice() -> str:
+    """Prompt user for a valid cuisine."""
+    while True:
+        cuisine = input("Choose cuisine type (Italian/Indian): ").strip().lower()
+        if cuisine in VALID_CUISINES:
+            return cuisine
+        print(f"Invalid cuisine. Please choose from: {', '.join(VALID_CUISINES)}")
 
-  if food_type == "Italian":
-    print("Available Italian Meals:")
-    for meal in italian_food:
-      print(meal)
-  
-  elif food_type == "Indian":
-    print("Available Indian Meals:")
-    for meal in indian_food:
-      print(meal)
-  
-  else:
-    print("invalid food type")  
+def create_summary(cuisine: str, meal_name: str, amount: int) -> str:
+    """
+    Generate an order summary string.
+    Returns a success message if meal is found, otherwise an error message.
+    """
+    canonical_meal = find_meal(cuisine, meal_name)
+    if canonical_meal:
+        # Optional: add pluralization for fun
+        meal_display = f"{amount} x {canonical_meal}"
+        return f"✅ You ordered: {meal_display}"
+    else:
+        return f"❌ Meal '{meal_name}' not found in {cuisine.capitalize()} menu."
 
-def create_summary(name, amount, food_type):
-  
-  order = select_meal(name, food_type)
-  if order:
-    return f"You ordered {amount} {name}"
-  else:
-    return  "Meal not found"
+def main():
+    print("🍽️  Welcome to the Food Order System!\n")
 
-print("Welcome to the Food Order System!")
+    cuisine = get_cuisine_choice()
+    display_available_meals(cuisine)
 
-type_input = input("Choose the type of food:")
+    meal_name = input("\nEnter the name of the meal: ").strip()
+    amount = get_positive_integer("Enter the quantity: ")
 
-display_available_meals(type_input)
+    result = create_summary(cuisine, meal_name, amount)
+    print("\n" + result)
 
-name_input = input("Enter the name of the food")
-amount_input = int(input("Enter the amount of food"))
-
-result = create_summary(name_input, amount_input, type_input)
-print(result)
+if __name__ == "__main__":
+    main()
